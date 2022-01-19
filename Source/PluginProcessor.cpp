@@ -46,7 +46,7 @@ IbkSampledInstrumentAudioProcessor::IbkSampledInstrumentAudioProcessor()
                                                          74,            // root midi note
                                                          0.1,           // attack time (sec)
                                                          0.1,           // release time (sec)
-                                                         10.0           // maximum sample length (sec)
+                                                         30.0           // maximum sample length (sec)
                                                          ));
 }
 

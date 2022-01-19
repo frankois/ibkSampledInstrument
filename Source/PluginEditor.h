@@ -13,6 +13,8 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "Utils/UtilsFiles.h"
+#include "EnvelopeComponent.h"
+#include "EffectsComponent.h"
 
 //==============================================================================
 /**
@@ -29,6 +31,8 @@ public:
 
 private:
     juce::ImageComponent mImageComponentIbksi;
+    EnvelopeComponent mEnvelope;
+    EffectsComponent mEffects;
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     IbkSampledInstrumentAudioProcessor& audioProcessor;

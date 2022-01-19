@@ -14,9 +14,18 @@
       <FILE id="c3v9Ne" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="eOra3i" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="Qkl4NH" name="EnvelopeComponent.cpp" compile="1" resource="0"
+            file="Source/EnvelopeComponent.cpp"/>
+      <FILE id="yOljKN" name="EnvelopeComponent.h" compile="0" resource="0"
+            file="Source/EnvelopeComponent.h"/>
+      <FILE id="PgQuoh" name="EffectsComponent.cpp" compile="1" resource="0"
+            file="Source/EffectsComponent.cpp"/>
+      <FILE id="kIqBlp" name="EffectsComponent.h" compile="0" resource="0"
+            file="Source/EffectsComponent.h"/>
     </GROUP>
     <GROUP id="{3634E554-4936-A0CA-B6D9-5044D7FE88F2}" name="Utils">
       <FILE id="MePxwM" name="UtilsFiles.h" compile="0" resource="0" file="Source/Utils/UtilsFiles.h"/>
+      <FILE id="CsnPpi" name="UtilsUI.h" compile="0" resource="0" file="Source/Utils/UtilsUI.h"/>
     </GROUP>
     <GROUP id="{177B5231-629D-8193-29F5-3032B8CF6D1D}" name="Assets">
       <FILE id="eEetZ9" name="ibksi.png" compile="0" resource="1" file="Assets/ibksi.png"/>
