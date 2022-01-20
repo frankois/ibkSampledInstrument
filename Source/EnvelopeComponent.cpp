@@ -16,7 +16,7 @@ EnvelopeComponent::EnvelopeComponent(IbkSampledInstrumentAudioProcessor& p) : au
 {
     const auto sliderType = juce::Slider::SliderStyle::LinearVertical;
     
-    // Sliders configuration
+    // Sliders config
     for (auto i = 0; i < mEnvelopeSliders.size(); i++)
     {
         mEnvelopeSliders[i]->setSliderStyle(sliderType);
@@ -24,11 +24,10 @@ EnvelopeComponent::EnvelopeComponent(IbkSampledInstrumentAudioProcessor& p) : au
         mEnvelopeSliders[i]->setColour(juce::Slider::ColourIds::thumbColourId, gIbkColour);
         mEnvelopeSliders[i]->setColour(juce::Slider::ColourIds::textBoxTextColourId, gTextColour);
         mEnvelopeSliders[i]->setColour(juce::Slider::ColourIds::textBoxBackgroundColourId, gIbkColour);
-        mEnvelopeSliders[i]->setRange(1, 1000, 1);
         addAndMakeVisible(mEnvelopeSliders[i]);
     }
     
-    // Labels configuration
+    // Labels config
     for (auto i = 0; i < mEnvelopeLabels.size(); i++)
     {
         mEnvelopeLabels[i]->setFont(gLabelFontSize);
@@ -36,10 +35,20 @@ EnvelopeComponent::EnvelopeComponent(IbkSampledInstrumentAudioProcessor& p) : au
         mEnvelopeLabels[i]->setJustificationType(juce::Justification::centred);
     }
     
+    // Sliders/Labels config
     mAttackLabel.attachToComponent(&mAttackSlider, false);
     mDecayLabel.attachToComponent(&mDecaySlider, false);
     mSustainLabel.attachToComponent(&mSustainSlider, false);
     mReleaseLabel.attachToComponent(&mReleaseSlider, false);
+    
+    // APVTS config
+    mAttackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "ATTACK", mAttackSlider);
+    
+    mDecayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "DECAY", mDecaySlider);
+    
+    mSustainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "SUSTAIN", mSustainSlider);
+    
+    mReleaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "RELEASE", mReleaseSlider);
 }
 
 EnvelopeComponent::~EnvelopeComponent()

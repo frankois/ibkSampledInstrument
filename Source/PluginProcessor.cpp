@@ -21,9 +21,11 @@ IbkSampledInstrumentAudioProcessor::IbkSampledInstrumentAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), mAPVTS (*this, nullptr, "PARAMETERS", createParameterLayout())
 #endif
 {
+    mAPVTS.state.addListener (this);
+    
     // Setup voices
     for (int i = 0; i < mNumVoices; i++)
     {
@@ -48,6 +50,8 @@ IbkSampledInstrumentAudioProcessor::IbkSampledInstrumentAudioProcessor()
                                                          0.1,           // release time (sec)
                                                          30.0           // maximum sample length (sec)
                                                          ));
+    
+    updateEnvelopeValue();
 }
 
 IbkSampledInstrumentAudioProcessor::~IbkSampledInstrumentAudioProcessor()
@@ -189,6 +193,41 @@ void IbkSampledInstrumentAudioProcessor::setStateInformation (const void* data, 
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout IbkSampledInstrumentAudioProcessor::createParameterLayout()
+{
+    std::vector<std::unique_ptr<juce::RangedAudioParameter>> rangedParameters;
+    
+    rangedParameters.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK", "Attack", 0.0f, 5.0f, 0.0f));
+    rangedParameters.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY", "Decay", 0.0f, 5.0f, 0.2f));
+    rangedParameters.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN", "Sustain", 0.0f, 1.0f, 0.0f));
+    rangedParameters.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release", 0.0f, 10.0f, 0.0f));
+    
+    return { rangedParameters.begin(), rangedParameters.end()} ;
+}
+
+void IbkSampledInstrumentAudioProcessor::updateEnvelopeValue()
+{
+    mEnvelopeParameters.attack = mAPVTS.getRawParameterValue("ATTACK")->load(); // returns std::atomic<float> pointer --> load()
+    mEnvelopeParameters.decay = mAPVTS.getRawParameterValue("DECAY")->load();
+    mEnvelopeParameters.sustain = mAPVTS.getRawParameterValue("SUSTAIN")->load();
+    mEnvelopeParameters.release = mAPVTS.getRawParameterValue("RELEASE")->load();
+    
+    for (int i = 0; i < mSampledInstrument.getNumSounds(); i++)
+    {
+        // it does not know if the sound is a SynthesiserSound of a SamplerSound
+        // so we cast it to check it is indeed a SamplerSound
+        if (auto sound = dynamic_cast<juce::SamplerSound*>(mSampledInstrument.getSound(i).get())) // we need the .get() because it is a unique ptr
+        {
+            sound->setEnvelopeParameters(mEnvelopeParameters);
+        }
+    }
+}
+
+void IbkSampledInstrumentAudioProcessor::valueTreePropertyChanged(juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &property)
+{
+    updateEnvelopeValue();
 }
 
 //==============================================================================

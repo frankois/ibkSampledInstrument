@@ -34,6 +34,11 @@ private:
     std::vector<juce::Slider*> mEnvelopeSliders = { &mAttackSlider, &mDecaySlider, &mSustainSlider, &mReleaseSlider };
     std::vector<juce::Label*> mEnvelopeLabels = { &mAttackLabel, &mDecayLabel, &mSustainLabel, &mReleaseLabel };
     
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mAttackAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mDecayAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mSustainAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mReleaseAttachment;
+    
     IbkSampledInstrumentAudioProcessor& audioProcessor;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnvelopeComponent)

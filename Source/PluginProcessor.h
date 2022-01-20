@@ -15,7 +15,8 @@
 //==============================================================================
 /**
 */
-class IbkSampledInstrumentAudioProcessor  : public juce::AudioProcessor
+class IbkSampledInstrumentAudioProcessor  : public juce::AudioProcessor,
+                                            public juce::ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -55,11 +56,20 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
     
-    void loadFile();
+    //==============================================================================
+    juce::AudioProcessorValueTreeState& getAPVTS() { return mAPVTS; }
+    void updateEnvelopeValue();
 
 private:
     juce::Synthesiser mSampledInstrument;
     const int mNumVoices { 16 };
+    
+    juce::AudioProcessorValueTreeState mAPVTS;
+    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
+    
+    juce::ADSR::Parameters mEnvelopeParameters;
+    
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IbkSampledInstrumentAudioProcessor)
