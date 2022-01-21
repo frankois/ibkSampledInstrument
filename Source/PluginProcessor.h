@@ -59,6 +59,7 @@ public:
     //==============================================================================
     juce::AudioProcessorValueTreeState& getAPVTS() { return mAPVTS; }
     void updateEnvelopeValue();
+    void updateChorusValue();
 
 private:
     juce::Synthesiser mSampledInstrument;
@@ -70,6 +71,7 @@ private:
     
     juce::ADSR::Parameters mEnvelopeParameters;
     
+    juce::dsp::Chorus<float> mChorus;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IbkSampledInstrumentAudioProcessor)

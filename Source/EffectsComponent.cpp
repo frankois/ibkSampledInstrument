@@ -12,7 +12,7 @@
 #include "EffectsComponent.h"
 
 //==============================================================================
-EffectsComponent::EffectsComponent()
+EffectsComponent::EffectsComponent(IbkSampledInstrumentAudioProcessor& p) : audioProcessor(p)
 {
     const auto sliderType = juce::Slider::SliderStyle::RotaryVerticalDrag;
     
@@ -41,6 +41,23 @@ EffectsComponent::EffectsComponent()
     mFxTwoLabel.attachToComponent(&mFxTwoSlider, false);
     mFxThreeLabel.attachToComponent(&mFxThreeSlider, false);
     mFxFourLabel.attachToComponent(&mFxFourSlider, false);
+    mFxFiveLabel.attachToComponent(&mFxFiveSlider, false);
+    mFxSixLabel.attachToComponent(&mFxSixSlider, false);
+    mFxSevenLabel.attachToComponent(&mFxSevenSlider, false);
+    mFxEightLabel.attachToComponent(&mFxEightSlider, false);
+    mFxNineLabel.attachToComponent(&mFxNineSlider, false);
+    mFxTenLabel.attachToComponent(&mFxTenSlider, false);
+    
+    // APVTS config
+    mRateAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "RATE", mFxOneSlider);
+    
+    mDepthAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "DEPTH", mFxTwoSlider);
+    
+    mCentreDelayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "CENTREDELAY", mFxThreeSlider);
+    
+    mFeedbackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "FEEDBACK", mFxFourSlider);
+    
+    mMixAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "MIX", mFxFiveSlider);
 }
 
 EffectsComponent::~EffectsComponent()
@@ -53,6 +70,30 @@ EffectsComponent::~EffectsComponent()
 
 void EffectsComponent::paint (juce::Graphics& g)
 {
+    
+//    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
+    
+    const auto otherOffsetY = 105.0f;
+    
+    const auto chorusBackgroundBorder = juce::Rectangle<float>(0.0f, 2.0f, 19.0f, 94.0f);
+    const auto chorusBackground = juce::Rectangle<float>(2.0f, 4.0f, 15.0f, 90.0f);
+    
+    const auto otherBackgroundBorder = juce::Rectangle<float>(0.0f, otherOffsetY + 0.0f, 19.0f, 94.0f);
+    const auto otherBackground = juce::Rectangle<float>(2.0f, otherOffsetY + 2.0f, 15.0f, 90.0f);
+    
+    g.setColour(juce::Colours::black);
+    g.fillRect(chorusBackgroundBorder);
+    g.fillRect(otherBackgroundBorder);
+    
+    g.setColour(gIbkColour);
+    g.fillRect(chorusBackground);
+    g.fillRect(otherBackground);
+    
+    juce::Font titleFont = juce::Font(juce::Font::getDefaultSansSerifFontName(), 13.0f, juce::Font::bold);
+    g.setFont(titleFont);
+    g.setColour (juce::Colours::white);
+    g.drawMultiLineText ("CHORUS", 9 , 20.0f, 1.0f, juce::Justification::centred);
+    g.drawMultiLineText ("OTHER", 9 , 130.0f, 1.0f, juce::Justification::centred);
 }
 
 void EffectsComponent::resized()
@@ -63,15 +104,40 @@ void EffectsComponent::resized()
     const auto labelWidth = sliderWidth;
     const auto labelHeight = 15;
     
-    mFxOneSlider.setBounds(0, 15, sliderWidth, sliderHeight);
-    mFxOneLabel.setBounds(0, 5, labelWidth, labelHeight);
+    const auto coordOriginX = 15;
+    const auto coordOriginSliderY = 15;
+    const auto coordOriginLabelY = 5;
+    const auto coordOffsetSliderY = coordOriginSliderY + sliderHeight + labelHeight + 10;
+    const auto coordOffsetLabelY = coordOriginLabelY + sliderHeight + labelHeight + 10;
     
-    mFxTwoSlider.setBounds(105, 15, sliderWidth, sliderHeight);
-    mFxTwoLabel.setBounds(105, 5, labelWidth, labelHeight);
     
-    mFxThreeSlider.setBounds(0, 115, sliderWidth, sliderHeight);
-    mFxThreeLabel.setBounds(0, 105, labelWidth, labelHeight);
+    mFxOneSlider.setBounds(coordOriginX, coordOriginSliderY, sliderWidth, sliderHeight);
+    mFxOneLabel.setBounds(coordOriginX, coordOriginLabelY, labelWidth, labelHeight);
     
-    mFxFourSlider.setBounds(105, 115, sliderWidth, sliderHeight);
-    mFxFourLabel.setBounds(105, 105, labelWidth, labelHeight);
+    mFxTwoSlider.setBounds(coordOriginX + sliderWidth, coordOriginSliderY, sliderWidth, sliderHeight);
+    mFxTwoLabel.setBounds(coordOriginX + sliderWidth, coordOriginLabelY, labelWidth, labelHeight);
+    
+    mFxThreeSlider.setBounds(coordOriginX + 2 * sliderWidth, coordOriginSliderY, sliderWidth, sliderHeight);
+    mFxThreeLabel.setBounds(coordOriginX + 2 * sliderWidth, coordOriginLabelY, labelWidth, labelHeight);
+    
+    mFxFourSlider.setBounds(coordOriginX + 3 * sliderWidth, coordOriginSliderY, sliderWidth, sliderHeight);
+    mFxFourLabel.setBounds(coordOriginX + 3 * sliderWidth, coordOriginLabelY, labelWidth, labelHeight);
+    
+    mFxFiveSlider.setBounds(coordOriginX + 4 * sliderWidth, coordOriginSliderY, sliderWidth, sliderHeight);
+    mFxFiveLabel.setBounds(coordOriginX + 4 * sliderWidth, coordOriginLabelY, labelWidth, labelHeight);
+    
+    mFxSixSlider.setBounds(coordOriginX, coordOffsetSliderY, sliderWidth, sliderHeight);
+    mFxSixLabel.setBounds(coordOriginX, coordOffsetLabelY, labelWidth, labelHeight);
+
+    mFxSevenSlider.setBounds(coordOriginX + sliderWidth, coordOffsetSliderY, sliderWidth, sliderHeight);
+    mFxSevenLabel.setBounds(coordOriginX + sliderWidth, coordOffsetLabelY, labelWidth, labelHeight);
+
+    mFxEightSlider.setBounds(coordOriginX + 2 * sliderWidth, coordOffsetSliderY, sliderWidth, sliderHeight);
+    mFxEightLabel.setBounds(coordOriginX + 2 * sliderWidth, coordOffsetLabelY, labelWidth, labelHeight);
+
+    mFxNineSlider.setBounds(coordOriginX + 3 * sliderWidth, coordOffsetSliderY, sliderWidth, sliderHeight);
+    mFxNineLabel.setBounds(coordOriginX + 3 * sliderWidth, coordOffsetLabelY, labelWidth, labelHeight);
+
+    mFxTenSlider.setBounds(coordOriginX + 4 * sliderWidth, coordOffsetSliderY, sliderWidth, sliderHeight);
+    mFxTenLabel.setBounds(coordOriginX + 4 * sliderWidth, coordOffsetLabelY, labelWidth, labelHeight);
 }

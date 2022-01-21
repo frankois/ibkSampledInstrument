@@ -52,6 +52,7 @@ IbkSampledInstrumentAudioProcessor::IbkSampledInstrumentAudioProcessor()
                                                          ));
     
     updateEnvelopeValue();
+    updateChorusValue();
 }
 
 IbkSampledInstrumentAudioProcessor::~IbkSampledInstrumentAudioProcessor()
@@ -124,6 +125,15 @@ void IbkSampledInstrumentAudioProcessor::changeProgramName (int index, const juc
 void IbkSampledInstrumentAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     mSampledInstrument.setCurrentPlaybackSampleRate (sampleRate);
+    
+    // Chorus prepare
+    juce::dsp::ProcessSpec spec;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.sampleRate = sampleRate;
+    spec.numChannels = 2;
+    
+    mChorus.prepare (spec);
+    mChorus.reset();
 }
 
 void IbkSampledInstrumentAudioProcessor::releaseResources()
@@ -168,6 +178,9 @@ void IbkSampledInstrumentAudioProcessor::processBlock (juce::AudioBuffer<float>&
         buffer.clear (i, 0, buffer.getNumSamples());
     
     mSampledInstrument.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
+    
+    juce::dsp::AudioBlock<float> sampleBlock (buffer);
+    mChorus.process (juce::dsp::ProcessContextReplacing<float> (sampleBlock));
 }
 
 //==============================================================================
@@ -199,35 +212,49 @@ juce::AudioProcessorValueTreeState::ParameterLayout IbkSampledInstrumentAudioPro
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> rangedParameters;
     
-    rangedParameters.push_back(std::make_unique<juce::AudioParameterFloat>("ATTACK", "Attack", 0.0f, 5.0f, 0.0f));
-    rangedParameters.push_back(std::make_unique<juce::AudioParameterFloat>("DECAY", "Decay", 0.0f, 5.0f, 0.2f));
-    rangedParameters.push_back(std::make_unique<juce::AudioParameterFloat>("SUSTAIN", "Sustain", 0.0f, 1.0f, 0.0f));
-    rangedParameters.push_back(std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release", 0.0f, 10.0f, 0.0f));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("ATTACK", "Attack", 0.0f, 5.0f, 0.0f));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("DECAY", "Decay", 0.0f, 5.0f, 2.5f));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("SUSTAIN", "Sustain", 0.0f, 1.0f, 0.8f));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release", 0.0f, 10.0f, 3.0f));
+    
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterInt>  ("RATE", "Rate", 0, 99, 4));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("DEPTH", "Depth", 0.0f, 1.0f, 0.25f));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterInt>  ("CENTREDELAY", "Centre Delay", 1, 99, 1));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("FEEDBACK", "Feedback", -1.0f, 1.0f, 0.0f));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("MIX", "Mix", 0.0f, 1.0f, 0.6f));
     
     return { rangedParameters.begin(), rangedParameters.end()} ;
 }
 
 void IbkSampledInstrumentAudioProcessor::updateEnvelopeValue()
 {
-    mEnvelopeParameters.attack = mAPVTS.getRawParameterValue("ATTACK")->load(); // returns std::atomic<float> pointer --> load()
-    mEnvelopeParameters.decay = mAPVTS.getRawParameterValue("DECAY")->load();
-    mEnvelopeParameters.sustain = mAPVTS.getRawParameterValue("SUSTAIN")->load();
-    mEnvelopeParameters.release = mAPVTS.getRawParameterValue("RELEASE")->load();
+    mEnvelopeParameters.attack  = mAPVTS.getRawParameterValue ("ATTACK")->load();
+    mEnvelopeParameters.decay   = mAPVTS.getRawParameterValue ("DECAY")->load();
+    mEnvelopeParameters.sustain = mAPVTS.getRawParameterValue ("SUSTAIN")->load();
+    mEnvelopeParameters.release = mAPVTS.getRawParameterValue ("RELEASE")->load();
     
     for (int i = 0; i < mSampledInstrument.getNumSounds(); i++)
     {
-        // it does not know if the sound is a SynthesiserSound of a SamplerSound
-        // so we cast it to check it is indeed a SamplerSound
-        if (auto sound = dynamic_cast<juce::SamplerSound*>(mSampledInstrument.getSound(i).get())) // we need the .get() because it is a unique ptr
+        if (auto sound = dynamic_cast<juce::SamplerSound*>(mSampledInstrument.getSound(i).get()))
         {
             sound->setEnvelopeParameters(mEnvelopeParameters);
         }
     }
 }
 
+void IbkSampledInstrumentAudioProcessor::updateChorusValue()
+{
+    mChorus.setRate(mAPVTS.getRawParameterValue("RATE")->load());
+    mChorus.setDepth(mAPVTS.getRawParameterValue("DEPTH")->load());
+    mChorus.setCentreDelay(mAPVTS.getRawParameterValue("CENTREDELAY")->load());
+    mChorus.setFeedback(mAPVTS.getRawParameterValue("FEEDBACK")->load());
+    mChorus.setMix(mAPVTS.getRawParameterValue("MIX")->load());
+}
+
 void IbkSampledInstrumentAudioProcessor::valueTreePropertyChanged(juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &property)
 {
     updateEnvelopeValue();
+    updateChorusValue();
 }
 
 //==============================================================================

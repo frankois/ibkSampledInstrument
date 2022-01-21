@@ -13,7 +13,7 @@
 
 //==============================================================================
 IbkSampledInstrumentAudioProcessorEditor::IbkSampledInstrumentAudioProcessorEditor (IbkSampledInstrumentAudioProcessor& p)
-    : AudioProcessorEditor (&p), mEnvelope(p), audioProcessor (p)
+: AudioProcessorEditor (&p), mEnvelope(p), mEffects(p), audioProcessor (p)
 {
     auto ibksi = juce::ImageCache::getFromMemory(BinaryData::ibksi_png , BinaryData::ibksi_pngSize);
 
@@ -37,7 +37,7 @@ void IbkSampledInstrumentAudioProcessorEditor::paint (juce::Graphics& g)
 {
     mImageComponentIbksi.setBounds(0,0,982,460);
     mEnvelope.setBounds(280, 50, 200, 200);
-    mEffects.setBounds(520, 50, 200, 200);
+    mEffects.setBounds(520, 50, 415, 200);
 }
 
 void IbkSampledInstrumentAudioProcessorEditor::resized()
