@@ -12,9 +12,8 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "Utils/UtilsFiles.h"
-#include "EnvelopeComponent.h"
-#include "EffectsComponent.h"
+#include "Gui/EnvelopeGui.h"
+#include "Gui/EffectsGui.h"
 
 //==============================================================================
 /**
@@ -30,12 +29,10 @@ public:
     void resized() override;
 
 private:
-    juce::ImageComponent mImageComponentIbksi;
-    EnvelopeComponent mEnvelope;
-    EffectsComponent mEffects;
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
     IbkSampledInstrumentAudioProcessor& audioProcessor;
+    juce::ImageComponent mImageComponentIbksi;
+    EnvelopeGui mEnvelopeGui;
+    EffectsGui mEffectsGui;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IbkSampledInstrumentAudioProcessorEditor)
 };

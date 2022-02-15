@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    EnvelopeComponent.h
+    EnvelopeGui.h
     
     Copyright (C) 2022 Francois Decourcelle
 
@@ -11,17 +11,17 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "PluginProcessor.h"
-#include "Utils/UtilsUI.h"
+#include "../PluginProcessor.h"
+#include "CommonGui.h"
 
 //==============================================================================
 /*
 */
-class EnvelopeComponent  : public juce::Component
+class EnvelopeGui  : public juce::Component
 {
 public:
-    EnvelopeComponent(IbkSampledInstrumentAudioProcessor& p);
-    ~EnvelopeComponent() override;
+    EnvelopeGui (juce::String name, juce::AudioProcessorValueTreeState& apvts, juce::String attackId, juce::String decayId, juce::String sustainId, juce::String releaseId);
+    ~EnvelopeGui() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
@@ -39,7 +39,7 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mSustainAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mReleaseAttachment;
     
-    IbkSampledInstrumentAudioProcessor& audioProcessor;
+    juce::String mComponentName {""};
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnvelopeComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnvelopeGui)
 };

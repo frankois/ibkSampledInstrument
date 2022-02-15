@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    EnvelopeComponent.cpp
+    EnvelopeGui.cpp
  
     Copyright (C) 2022 Francois Decourcelle
 
@@ -9,11 +9,12 @@
 */
 
 #include <JuceHeader.h>
-#include "EnvelopeComponent.h"
+#include "EnvelopeGui.h"
 
 //==============================================================================
-EnvelopeComponent::EnvelopeComponent(IbkSampledInstrumentAudioProcessor& p) : audioProcessor(p)
+EnvelopeGui::EnvelopeGui(juce::String name, juce::AudioProcessorValueTreeState& apvts, juce::String attackId, juce::String decayId, juce::String sustainId, juce::String releaseId)
 {
+    mComponentName = name;
     const auto sliderType = juce::Slider::SliderStyle::LinearVertical;
     
     // Sliders config
@@ -42,16 +43,14 @@ EnvelopeComponent::EnvelopeComponent(IbkSampledInstrumentAudioProcessor& p) : au
     mReleaseLabel.attachToComponent(&mReleaseSlider, false);
     
     // APVTS config
-    mAttackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "ATTACK", mAttackSlider);
-    
-    mDecayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "DECAY", mDecaySlider);
-    
-    mSustainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "SUSTAIN", mSustainSlider);
-    
-    mReleaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "RELEASE", mReleaseSlider);
+    using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+    mAttackAttachment = std::make_unique<SliderAttachment> (apvts, attackId, mAttackSlider);
+    mDecayAttachment = std::make_unique<SliderAttachment> (apvts, decayId, mDecaySlider);
+    mSustainAttachment = std::make_unique<SliderAttachment> (apvts, sustainId, mSustainSlider);
+    mReleaseAttachment = std::make_unique<SliderAttachment> (apvts, releaseId, mReleaseSlider);
 }
 
-EnvelopeComponent::~EnvelopeComponent()
+EnvelopeGui::~EnvelopeGui()
 {
     mEnvelopeLabels.clear();
     mEnvelopeLabels.shrink_to_fit();
@@ -59,11 +58,11 @@ EnvelopeComponent::~EnvelopeComponent()
     mEnvelopeSliders.shrink_to_fit();
 }
 
-void EnvelopeComponent::paint (juce::Graphics& g)
+void EnvelopeGui::paint (juce::Graphics& g)
 {
 }
 
-void EnvelopeComponent::resized()
+void EnvelopeGui::resized()
 {
     const auto coordOriginX = 0;
     const auto coordOriginY = 0;

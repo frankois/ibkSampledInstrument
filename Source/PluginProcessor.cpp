@@ -14,45 +14,18 @@
 //==============================================================================
 IbkSampledInstrumentAudioProcessor::IbkSampledInstrumentAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
+    : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ), mAPVTS (*this, nullptr, "PARAMETERS", createParameterLayout())
+                       )
+    , mAPVTS (*this, nullptr, "PARAMETERS", createParameterLayout())
 #endif
 {
-    mAPVTS.state.addListener (this);
-    
-    // Setup voices
-    for (int i = 0; i < mNumVoices; i++)
-    {
-        mSampledInstrument.addVoice (new juce::SamplerVoice());
-    }
-    
-    // Setup sampled sound
-    mSampledInstrument.clearSounds();
-    juce::WavAudioFormat wavFormat;
-    
-    std::unique_ptr<juce::AudioFormatReader> audioReader (wavFormat.createReaderFor (createSamplesInputStream ("os_synth.wav").release(), true));
-    
-    juce::BigInteger allNotes;
-    allNotes.setRange (0, 128, true);
-    
-    mSampledInstrument.clearSounds();
-    mSampledInstrument.addSound (new juce::SamplerSound ("vox",         // name
-                                                         *audioReader,  // source
-                                                         allNotes,      // midi notes range
-                                                         74,            // root midi note
-                                                         0.1,           // attack time (sec)
-                                                         0.1,           // release time (sec)
-                                                         30.0           // maximum sample length (sec)
-                                                         ));
-    
-    updateEnvelopeValue();
-    updateChorusValue();
+    mEngineSampler.setup();
 }
 
 IbkSampledInstrumentAudioProcessor::~IbkSampledInstrumentAudioProcessor()
@@ -124,16 +97,7 @@ void IbkSampledInstrumentAudioProcessor::changeProgramName (int index, const juc
 //==============================================================================
 void IbkSampledInstrumentAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    mSampledInstrument.setCurrentPlaybackSampleRate (sampleRate);
-    
-    // Chorus prepare
-    juce::dsp::ProcessSpec spec;
-    spec.maximumBlockSize = samplesPerBlock;
-    spec.sampleRate = sampleRate;
-    spec.numChannels = 2;
-    
-    mChorus.prepare (spec);
-    mChorus.reset();
+    mEngineSampler.prepareToPlay(sampleRate, samplesPerBlock, getTotalNumOutputChannels());
 }
 
 void IbkSampledInstrumentAudioProcessor::releaseResources()
@@ -177,10 +141,29 @@ void IbkSampledInstrumentAudioProcessor::processBlock (juce::AudioBuffer<float>&
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
-    mSampledInstrument.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
+    for (int i = 0; i < mEngineSampler.getNumVoices(); ++i)
+    {
+        if (auto voice = dynamic_cast<EngineVoice*>(mEngineSampler.getVoice(i)))
+        {
+            // Amp Envelope
+            auto attack  = mAPVTS.getRawParameterValue("ATTACK")->load();
+            auto decay   = mAPVTS.getRawParameterValue("DECAY")->load();
+            auto sustain = mAPVTS.getRawParameterValue("SUSTAIN")->load();
+            auto release = mAPVTS.getRawParameterValue("RELEASE")->load();
+
+            // Chorus
+            auto rate = mAPVTS.getRawParameterValue("RATE")->load();
+            auto depth = mAPVTS.getRawParameterValue("DEPTH")->load();
+            auto centreDelay = mAPVTS.getRawParameterValue("CENTREDELAY")->load();
+            auto feedback = mAPVTS.getRawParameterValue("FEEDBACK")->load();
+            auto mix = mAPVTS.getRawParameterValue("MIX")->load();
+
+            voice->updateAmpEnvelope (attack, decay, sustain, release);
+            voice->updateChorus(rate, depth, centreDelay, feedback, mix);
+        }
+    }
     
-    juce::dsp::AudioBlock<float> sampleBlock (buffer);
-    mChorus.process (juce::dsp::ProcessContextReplacing<float> (sampleBlock));
+    mEngineSampler.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
 //==============================================================================
@@ -215,7 +198,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout IbkSampledInstrumentAudioPro
     rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("ATTACK", "Attack", 0.0f, 5.0f, 0.0f));
     rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("DECAY", "Decay", 0.0f, 5.0f, 2.5f));
     rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("SUSTAIN", "Sustain", 0.0f, 1.0f, 0.8f));
-    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release", 0.0f, 10.0f, 3.0f));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("RELEASE", "Release", 0.0f, 10.0f, 7.0f));
     
     rangedParameters.push_back (std::make_unique<juce::AudioParameterInt>  ("RATE", "Rate", 0, 99, 4));
     rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("DEPTH", "Depth", 0.0f, 1.0f, 0.25f));
@@ -224,37 +207,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout IbkSampledInstrumentAudioPro
     rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("MIX", "Mix", 0.0f, 1.0f, 0.6f));
     
     return { rangedParameters.begin(), rangedParameters.end()} ;
-}
-
-void IbkSampledInstrumentAudioProcessor::updateEnvelopeValue()
-{
-    mEnvelopeParameters.attack  = mAPVTS.getRawParameterValue ("ATTACK")->load();
-    mEnvelopeParameters.decay   = mAPVTS.getRawParameterValue ("DECAY")->load();
-    mEnvelopeParameters.sustain = mAPVTS.getRawParameterValue ("SUSTAIN")->load();
-    mEnvelopeParameters.release = mAPVTS.getRawParameterValue ("RELEASE")->load();
-    
-    for (int i = 0; i < mSampledInstrument.getNumSounds(); i++)
-    {
-        if (auto sound = dynamic_cast<juce::SamplerSound*>(mSampledInstrument.getSound(i).get()))
-        {
-            sound->setEnvelopeParameters(mEnvelopeParameters);
-        }
-    }
-}
-
-void IbkSampledInstrumentAudioProcessor::updateChorusValue()
-{
-    mChorus.setRate(mAPVTS.getRawParameterValue("RATE")->load());
-    mChorus.setDepth(mAPVTS.getRawParameterValue("DEPTH")->load());
-    mChorus.setCentreDelay(mAPVTS.getRawParameterValue("CENTREDELAY")->load());
-    mChorus.setFeedback(mAPVTS.getRawParameterValue("FEEDBACK")->load());
-    mChorus.setMix(mAPVTS.getRawParameterValue("MIX")->load());
-}
-
-void IbkSampledInstrumentAudioProcessor::valueTreePropertyChanged(juce::ValueTree &treeWhosePropertyHasChanged, const juce::Identifier &property)
-{
-    updateEnvelopeValue();
-    updateChorusValue();
 }
 
 //==============================================================================

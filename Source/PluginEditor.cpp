@@ -13,7 +13,11 @@
 
 //==============================================================================
 IbkSampledInstrumentAudioProcessorEditor::IbkSampledInstrumentAudioProcessorEditor (IbkSampledInstrumentAudioProcessor& p)
-: AudioProcessorEditor (&p), mEnvelope(p), mEffects(p), audioProcessor (p)
+    : AudioProcessorEditor (&p)
+    , audioProcessor (p)
+    , mEnvelopeGui ("Amp Envelope", audioProcessor.getAPVTS(), "ATTACK", "DECAY", "SUSTAIN", "RELEASE")
+    , mEffectsGui (audioProcessor.getAPVTS(), "RATE", "DEPTH", "CENTREDELAY", "FEEDBACK", "MIX")
+    
 {
     auto ibksi = juce::ImageCache::getFromMemory(BinaryData::ibksi_png , BinaryData::ibksi_pngSize);
 
@@ -22,9 +26,8 @@ IbkSampledInstrumentAudioProcessorEditor::IbkSampledInstrumentAudioProcessorEdit
     mImageComponentIbksi.setImage(ibksi, juce::RectanglePlacement::stretchToFit);
     
     addAndMakeVisible(mImageComponentIbksi);
-    addAndMakeVisible(mEnvelope);
-    addAndMakeVisible(mEffects);
-    
+    addAndMakeVisible(mEnvelopeGui);
+    addAndMakeVisible(mEffectsGui);
     setSize (982, 460);
 }
 
@@ -35,11 +38,11 @@ IbkSampledInstrumentAudioProcessorEditor::~IbkSampledInstrumentAudioProcessorEdi
 //==============================================================================
 void IbkSampledInstrumentAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    mImageComponentIbksi.setBounds(0,0,982,460);
-    mEnvelope.setBounds(280, 50, 200, 200);
-    mEffects.setBounds(520, 50, 415, 200);
 }
 
 void IbkSampledInstrumentAudioProcessorEditor::resized()
 {
+    mImageComponentIbksi.setBounds(0,0,982,460);
+    mEnvelopeGui.setBounds(280, 50, 200, 200);
+    mEffectsGui.setBounds(520, 50, 415, 200);
 }

@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    EffectsComponent.cpp
+    EffectsGui.cpp
 
     Copyright (C) 2022 Francois Decourcelle
 
@@ -9,11 +9,12 @@
 */
 
 #include <JuceHeader.h>
-#include "EffectsComponent.h"
+#include "EffectsGui.h"
 
 //==============================================================================
-EffectsComponent::EffectsComponent(IbkSampledInstrumentAudioProcessor& p) : audioProcessor(p)
+EffectsGui::EffectsGui (juce::AudioProcessorValueTreeState& apvts, juce::String rateId, juce::String depthId, juce::String centreDelayId, juce::String feedbackId, juce::String mixId)
 {
+    
     const auto sliderType = juce::Slider::SliderStyle::RotaryVerticalDrag;
     
     // Sliders configuration
@@ -49,18 +50,15 @@ EffectsComponent::EffectsComponent(IbkSampledInstrumentAudioProcessor& p) : audi
     mFxTenLabel.attachToComponent(&mFxTenSlider, false);
     
     // APVTS config
-    mRateAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "RATE", mFxOneSlider);
-    
-    mDepthAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "DEPTH", mFxTwoSlider);
-    
-    mCentreDelayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "CENTREDELAY", mFxThreeSlider);
-    
-    mFeedbackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "FEEDBACK", mFxFourSlider);
-    
-    mMixAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.getAPVTS(), "MIX", mFxFiveSlider);
+    using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+    mRateAttachment = std::make_unique<SliderAttachment> (apvts, rateId, mFxOneSlider);
+    mDepthAttachment = std::make_unique<SliderAttachment> (apvts, depthId, mFxTwoSlider);
+    mCentreDelayAttachment = std::make_unique<SliderAttachment> (apvts, centreDelayId, mFxThreeSlider);
+    mFeedbackAttachment = std::make_unique<SliderAttachment> (apvts, feedbackId, mFxFourSlider);
+    mMixAttachment = std::make_unique<SliderAttachment> (apvts, mixId, mFxFiveSlider);
 }
 
-EffectsComponent::~EffectsComponent()
+EffectsGui::~EffectsGui()
 {
     mEffectsLabels.clear();
     mEffectsLabels.shrink_to_fit();
@@ -68,7 +66,7 @@ EffectsComponent::~EffectsComponent()
     mEffectsSliders.shrink_to_fit();
 }
 
-void EffectsComponent::paint (juce::Graphics& g)
+void EffectsGui::paint (juce::Graphics& g)
 {
     
 //    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
@@ -93,10 +91,10 @@ void EffectsComponent::paint (juce::Graphics& g)
     g.setFont(titleFont);
     g.setColour (juce::Colours::white);
     g.drawMultiLineText ("CHORUS", 9 , 20.0f, 1.0f, juce::Justification::centred);
-    g.drawMultiLineText ("OTHER", 9 , 130.0f, 1.0f, juce::Justification::centred);
+    g.drawMultiLineText ("LFO-P", 9 , 130.0f, 1.0f, juce::Justification::centred);
 }
 
-void EffectsComponent::resized()
+void EffectsGui::resized()
 {
     const auto sliderWidth = 80;
     const auto sliderHeight = 80;

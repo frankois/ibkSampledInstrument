@@ -14,18 +14,32 @@
       <FILE id="c3v9Ne" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="eOra3i" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="Qkl4NH" name="EnvelopeComponent.cpp" compile="1" resource="0"
-            file="Source/EnvelopeComponent.cpp"/>
-      <FILE id="yOljKN" name="EnvelopeComponent.h" compile="0" resource="0"
-            file="Source/EnvelopeComponent.h"/>
-      <FILE id="PgQuoh" name="EffectsComponent.cpp" compile="1" resource="0"
-            file="Source/EffectsComponent.cpp"/>
-      <FILE id="kIqBlp" name="EffectsComponent.h" compile="0" resource="0"
-            file="Source/EffectsComponent.h"/>
-    </GROUP>
-    <GROUP id="{3634E554-4936-A0CA-B6D9-5044D7FE88F2}" name="Utils">
-      <FILE id="MePxwM" name="UtilsFiles.h" compile="0" resource="0" file="Source/Utils/UtilsFiles.h"/>
-      <FILE id="CsnPpi" name="UtilsUI.h" compile="0" resource="0" file="Source/Utils/UtilsUI.h"/>
+      <GROUP id="{5FFED717-13A3-557F-0177-5ED993B08D4A}" name="Engine">
+        <FILE id="Mp4d3s" name="EngineSampler.cpp" compile="1" resource="0"
+              file="Source/Engine/EngineSampler.cpp"/>
+        <FILE id="XAiJpb" name="EngineSampler.h" compile="0" resource="0" file="Source/Engine/EngineSampler.h"/>
+        <FILE id="BIf5L9" name="EngineVoice.cpp" compile="1" resource="0" file="Source/Engine/EngineVoice.cpp"/>
+        <FILE id="ZxrwKI" name="EngineVoice.h" compile="0" resource="0" file="Source/Engine/EngineVoice.h"/>
+        <FILE id="Ojyh9k" name="EngineSound.cpp" compile="1" resource="0" file="Source/Engine/EngineSound.cpp"/>
+        <FILE id="kvrJMl" name="EngineSound.h" compile="0" resource="0" file="Source/Engine/EngineSound.h"/>
+      </GROUP>
+      <GROUP id="{1E8321D2-5EF4-E957-1775-F0D9B8591B5A}" name="Blocks">
+        <FILE id="XMiLqT" name="ChorusBlock.cpp" compile="1" resource="0" file="Source/Blocks/ChorusBlock.cpp"/>
+        <FILE id="zq2g3Z" name="ChorusBlock.h" compile="0" resource="0" file="Source/Blocks/ChorusBlock.h"/>
+        <FILE id="Hh4EHG" name="EnvelopeBlock.cpp" compile="1" resource="0"
+              file="Source/Blocks/EnvelopeBlock.cpp"/>
+        <FILE id="VKjgjA" name="EnvelopeBlock.h" compile="0" resource="0" file="Source/Blocks/EnvelopeBlock.h"/>
+      </GROUP>
+      <GROUP id="{37C934B0-B031-CCC5-0755-99CB5764F83D}" name="Gui">
+        <FILE id="qx7XqH" name="CommonGui.h" compile="0" resource="0" file="Source/Gui/CommonGui.h"/>
+        <FILE id="yJWCBs" name="EffectsGui.cpp" compile="1" resource="0" file="Source/Gui/EffectsGui.cpp"/>
+        <FILE id="m319pa" name="EffectsGui.h" compile="0" resource="0" file="Source/Gui/EffectsGui.h"/>
+        <FILE id="VCYWQI" name="EnvelopeGui.cpp" compile="1" resource="0" file="Source/Gui/EnvelopeGui.cpp"/>
+        <FILE id="v0qhiV" name="EnvelopeGui.h" compile="0" resource="0" file="Source/Gui/EnvelopeGui.h"/>
+      </GROUP>
+      <GROUP id="{3634E554-4936-A0CA-B6D9-5044D7FE88F2}" name="Utils">
+        <FILE id="MePxwM" name="UtilsFiles.h" compile="0" resource="0" file="Source/Utils/UtilsFiles.h"/>
+      </GROUP>
     </GROUP>
     <GROUP id="{177B5231-629D-8193-29F5-3032B8CF6D1D}" name="Assets">
       <FILE id="eEetZ9" name="ibksi.png" compile="0" resource="1" file="Assets/ibksi.png"/>

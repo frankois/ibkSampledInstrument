@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    EffectsComponent.h
+    EffectsGui.h
     
     Copyright (C) 2022 Francois Decourcelle
 
@@ -11,17 +11,17 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "PluginProcessor.h"
-#include "Utils/UtilsUI.h"
+#include "../PluginProcessor.h"
+#include "CommonGui.h"
 
 //==============================================================================
 /*
 */
-class EffectsComponent  : public juce::Component
+class EffectsGui  : public juce::Component
 {
 public:
-    EffectsComponent(IbkSampledInstrumentAudioProcessor& p);
-    ~EffectsComponent() override;
+    EffectsGui (juce::AudioProcessorValueTreeState& apvts, juce::String rateId, juce::String depthId, juce::String centreDelayId, juce::String feedbackId, juce::String mixId);
+    ~EffectsGui() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
@@ -40,7 +40,5 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mFeedbackAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mMixAttachment;
 
-    IbkSampledInstrumentAudioProcessor& audioProcessor;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EffectsComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EffectsGui)
 };

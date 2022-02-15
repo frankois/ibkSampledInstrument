@@ -11,6 +11,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "Engine/EngineSampler.h"
+#include "Blocks/ChorusBlock.h"
 
 //==============================================================================
 /**
@@ -58,21 +60,12 @@ public:
     
     //==============================================================================
     juce::AudioProcessorValueTreeState& getAPVTS() { return mAPVTS; }
-    void updateEnvelopeValue();
-    void updateChorusValue();
 
 private:
-    juce::Synthesiser mSampledInstrument;
-    const int mNumVoices { 16 };
+    EngineSampler mEngineSampler;
     
     juce::AudioProcessorValueTreeState mAPVTS;
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-    void valueTreePropertyChanged(juce::ValueTree& treeWhosePropertyHasChanged, const juce::Identifier& property) override;
-    
-    juce::ADSR::Parameters mEnvelopeParameters;
-    
-    juce::dsp::Chorus<float> mChorus;
-
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (IbkSampledInstrumentAudioProcessor)
 };
