@@ -35,12 +35,19 @@ public:
     
     void updateAmpEnvelope (const float attack, const float decay, const float sustain, const float release);
     void updateChorus (const float rate, const float depth, const float centreDelay, const float feedback, const float mix);
+    void updateLfo (const float rate, const float depth);
     
     
 private:
-    double mPitchRatio = 0;
-    double mSamplePosition = 0.0;
+    float mPitchRatio = 0.0f;
+    float mModulatedPitch = 0.0f;
+    float mSamplePosition = 0.0f;
     float mVelocity = 0.0f;
+    
+    juce::dsp::Oscillator<float> mLfo;
+    float mLfoOut = 0.0f;
+    float mLfoDepth = 0.0f;
+    float mLfoRate = 100.0f;
     
     juce::AudioBuffer<float> mSynthBuffer;
     EnvelopeBlock mAmpEnvelope;

@@ -16,7 +16,7 @@ IbkSampledInstrumentAudioProcessorEditor::IbkSampledInstrumentAudioProcessorEdit
     : AudioProcessorEditor (&p)
     , audioProcessor (p)
     , mEnvelopeGui ("Amp Envelope", audioProcessor.getAPVTS(), "ATTACK", "DECAY", "SUSTAIN", "RELEASE")
-    , mEffectsGui (audioProcessor.getAPVTS(), "RATE", "DEPTH", "CENTREDELAY", "FEEDBACK", "MIX")
+    , mEffectsGui (audioProcessor.getAPVTS(), "RATE", "DEPTH", "CENTREDELAY", "FEEDBACK", "MIX", "LFORATE", "LFODEPTH")
     
 {
     auto ibksi = juce::ImageCache::getFromMemory(BinaryData::ibksi_png , BinaryData::ibksi_pngSize);

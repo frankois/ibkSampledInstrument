@@ -10,7 +10,12 @@
 
 #include "EngineVoice.h"
 
-EngineVoice::EngineVoice() {}
+EngineVoice::EngineVoice()
+{
+    mLfo.setFrequency (mLfoRate);
+    mLfo.initialise ([] (float x) { return std::sin(x); }, 128);
+}
+
 EngineVoice::~EngineVoice() {}
 
 bool EngineVoice::canPlaySound (juce::SynthesiserSound* sound)
@@ -24,9 +29,11 @@ void EngineVoice::startNote (int midiNoteNumber, float velocity, juce::Synthesis
     {
         mPitchRatio = std::pow (2.0, (midiNoteNumber - sound->getMidiRootNote()) / 12.0)
                         * sound->getSampleRate() / getSampleRate();
-
+            
         mSamplePosition = 0.0;
         mVelocity = velocity;
+        
+        mLfo.reset();
         
         mAmpEnvelope.noteOn();
     }
@@ -62,6 +69,8 @@ void EngineVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outp
     mAmpEnvelope.setSampleRate (sampleRate);
     mChorus.prepareToPlay (spec);
     
+    mLfo.prepare (spec);
+    
     isPrepared = true;
 }
 
@@ -84,6 +93,12 @@ void EngineVoice::renderNextBlock (juce::AudioBuffer<float>& outputBuffer, int s
         float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer (1, startSample) : nullptr;
         
         auto procBufPointers = mSynthBuffer.getArrayOfWritePointers();
+        
+        mLfoOut = mLfo.processSample(0.0f);
+        
+        auto mLfoOutRange = juce::jmap (mLfoOut, -1.0f, 1.0f, 1.0f, 20.0f);
+        auto semitones = mLfoOutRange * mLfoDepth;
+        auto modulatedPitch = mPitchRatio * std::pow(2, semitones / 12);
 
         for (int i = 0; i < numSamples; ++i)
         {
@@ -103,8 +118,10 @@ void EngineVoice::renderNextBlock (juce::AudioBuffer<float>& outputBuffer, int s
             procBufPointers[0][i] = l * mVelocity;
             procBufPointers[1][i] = r * mVelocity;
             
-            mSamplePosition += mPitchRatio;
-
+//            mSamplePosition += mPitchRatio;
+            mSamplePosition += modulatedPitch;
+//            mSamplePosition += 1;
+            
             if (mSamplePosition > playingSound->getSampleLength())
             {
                 stopNote (0.0f, false);
@@ -139,4 +156,12 @@ void EngineVoice::updateAmpEnvelope(const float attack, const float decay, const
 void EngineVoice::updateChorus (const float rate, const float depth, const float centreDelay, const float feedback, const float mix)
 {
     mChorus.updateParameters (rate, depth, centreDelay, feedback, mix);
+}
+
+void EngineVoice::updateLfo (const float rate, const float depth)
+{
+    mLfoRate = rate;
+    mLfoDepth = depth;
+    
+    mLfo.setFrequency (mLfoRate);
 }

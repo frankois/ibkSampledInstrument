@@ -157,9 +157,14 @@ void IbkSampledInstrumentAudioProcessor::processBlock (juce::AudioBuffer<float>&
             auto centreDelay = mAPVTS.getRawParameterValue("CENTREDELAY")->load();
             auto feedback = mAPVTS.getRawParameterValue("FEEDBACK")->load();
             auto mix = mAPVTS.getRawParameterValue("MIX")->load();
+            
+            // LFO
+            auto lfoRate = mAPVTS.getRawParameterValue("LFORATE")->load();
+            auto lfoDepth = mAPVTS.getRawParameterValue("LFODEPTH")->load();
 
             voice->updateAmpEnvelope (attack, decay, sustain, release);
-            voice->updateChorus(rate, depth, centreDelay, feedback, mix);
+            voice->updateChorus (rate, depth, centreDelay, feedback, mix);
+            voice->updateLfo (lfoRate, lfoDepth);
         }
     }
     
@@ -205,6 +210,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout IbkSampledInstrumentAudioPro
     rangedParameters.push_back (std::make_unique<juce::AudioParameterInt>  ("CENTREDELAY", "Centre Delay", 1, 99, 1));
     rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("FEEDBACK", "Feedback", -1.0f, 1.0f, 0.0f));
     rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("MIX", "Mix", 0.0f, 1.0f, 0.6f));
+    
+//    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("LFORATE", "LfoRate", 0.0f, 100000.0f, 20.0f));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("LFORATE", "LfoRate", juce::NormalisableRange<float> { 0.0f, 10000.0f, 100.0f }, 0.0f, "Hz"));
+    rangedParameters.push_back (std::make_unique<juce::AudioParameterFloat>("LFODEPTH", "LfoDepth", 0.0f, 1.0f, 0.6f));
     
     return { rangedParameters.begin(), rangedParameters.end()} ;
 }

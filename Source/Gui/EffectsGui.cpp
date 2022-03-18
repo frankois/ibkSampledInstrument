@@ -12,7 +12,7 @@
 #include "EffectsGui.h"
 
 //==============================================================================
-EffectsGui::EffectsGui (juce::AudioProcessorValueTreeState& apvts, juce::String rateId, juce::String depthId, juce::String centreDelayId, juce::String feedbackId, juce::String mixId)
+EffectsGui::EffectsGui (juce::AudioProcessorValueTreeState& apvts, juce::String rateId, juce::String depthId, juce::String centreDelayId, juce::String feedbackId, juce::String mixId, juce::String lfoRateId, juce::String lfoDepthId)
 {
     
     const auto sliderType = juce::Slider::SliderStyle::RotaryVerticalDrag;
@@ -56,6 +56,9 @@ EffectsGui::EffectsGui (juce::AudioProcessorValueTreeState& apvts, juce::String 
     mCentreDelayAttachment = std::make_unique<SliderAttachment> (apvts, centreDelayId, mFxThreeSlider);
     mFeedbackAttachment = std::make_unique<SliderAttachment> (apvts, feedbackId, mFxFourSlider);
     mMixAttachment = std::make_unique<SliderAttachment> (apvts, mixId, mFxFiveSlider);
+    
+    mLfoRate = std::make_unique<SliderAttachment> (apvts, lfoRateId, mFxSixSlider);
+    mLfoDepth = std::make_unique<SliderAttachment> (apvts, lfoDepthId, mFxSevenSlider);
 }
 
 EffectsGui::~EffectsGui()
